@@ -65,34 +65,27 @@ Files containing some values:
 
 Source pages require a parent:
 
-  $ odoc compile -c module-a -c src-source -c src-source2 root.mld
+  $ odoc compile -c module-a -c srctree-source -c srctree-source2 root.mld
 
 Compile the modules:
 
   $ ocamlc -c a.ml -bin-annot
 
-Compile the pages without --source:
-
-  $ odoc compile a.cmt
-  $ odoc link -I . a.odoc
-  $ odoc html-generate --indent -o html a.odocl
-
-No source links are generated in the documentation:
-
-  $ ! grep source_link html/A/index.html -B 2
-
-Now, compile the pages with the --source option:
+Compile the pages with the --source option:
 
   $ printf "a.ml\n" > source_tree.map
-  $ odoc source-tree -I . --parent page-root -o src-source.odoc source_tree.map
+  $ odoc source-tree -I . --parent page-root -o srctree-source.odoc source_tree.map
 
-  $ odoc compile -I . --source-name a.ml --source-parent-file src-source.odoc a.cmt
+  $ odoc compile-src -I . --source-path a.ml --source-parent-file srctree-source.odoc a.cmt
+  $ odoc compile -I . a.cmt
   $ odoc link -I . a.odoc
+  $ odoc link -I . src-a.odoc
   $ odoc link -I . page-root.odoc
-  $ odoc link -I . src-source.odoc
-  $ odoc html-generate --indent -o html src-source.odocl
+  $ odoc link -I . srctree-source.odoc
+  $ odoc html-generate --indent -o html srctree-source.odocl
   $ odoc html-generate --indent -o html page-root.odocl
-  $ odoc html-generate --source a.ml --indent -o html a.odocl
+  $ odoc html-generate --indent -o html a.odocl
+  $ odoc html-generate --source a.ml --indent -o html src-a.odocl
   $ odoc support-files -o html
 
 Source links generated in the documentation:
@@ -280,7 +273,7 @@ Ids generated in the source code:
   id="module-Yoyo.type-bli.constructor-Aa"
   id="module-Yoyo.type-bli.constructor-Bb"
   id="val-segr"
-  id="val-{x}2"
+  id="val-{x}1"
   id="val-y"
   id="val-z"
   id="local_a_1"
