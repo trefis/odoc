@@ -2,7 +2,7 @@ open Odoc_model
 
 val read_cmt_infos :
   Paths.Identifier.Id.source_page ->
-  (Compat.shape * Compat.uid_to_loc) option ->
+  (Compat.shape * Compat.uid_to_item) option ->
   Typedtree.structure ->
   string ->
   Root.t ->

@@ -326,8 +326,8 @@ let rec extract_signature_tree_items : bool -> Typedtree.signature_item list -> 
 let rec read_pattern hide_item pat =
   let open Typedtree in
   match pat.pat_desc with
-  | Tpat_var(id, loc) -> [`Value(id, hide_item, Some loc.loc)]
-  | Tpat_alias(pat, id, loc) -> `Value(id, hide_item, Some loc.loc) :: read_pattern hide_item pat
+  | Tpat_var(id, loc, _) -> [`Value(id, hide_item, Some loc.loc)]
+  | Tpat_alias(pat, id, loc, _) -> `Value(id, hide_item, Some loc.loc) :: read_pattern hide_item pat
   | Tpat_record(pats, _) -> 
       List.concat (List.map (fun (_, _, pat) -> read_pattern hide_item pat) pats)
 #if OCAML_VERSION < (4,13,0)

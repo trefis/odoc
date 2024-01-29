@@ -232,11 +232,11 @@ type shape = Shape.t
 
 type 'a shape_uid_map = 'a Shape.Uid.Map.t
 
-type uid_to_loc = Warnings.loc Types.Uid.Tbl.t
+type uid_to_item = Typedtree.item_declaration Shape.Uid.Tbl.t
 let empty_map = Shape.Uid.Map.empty
 
-let shape_info_of_cmt_infos : Cmt_format.cmt_infos -> (shape * uid_to_loc) option =
- fun x -> Option.map (fun s -> (s, x.cmt_uid_to_loc)) x.cmt_impl_shape
+let shape_info_of_cmt_infos : Cmt_format.cmt_infos -> (shape * uid_to_item) option =
+ fun x -> Option.map (fun s -> (s, x.cmt_uid_to_decl)) x.cmt_impl_shape
 
 #else
 
@@ -244,9 +244,9 @@ type shape = unit
 
 type 'a shape_uid_map = unit
 
-type uid_to_loc = unit
+type uid_to_item = unit
 let empty_map = ()
 
-let shape_info_of_cmt_infos : Cmt_format.cmt_infos -> (shape * uid_to_loc) option = fun _ -> None
+let shape_info_of_cmt_infos : Cmt_format.cmt_infos -> (shape * uid_to_item) option = fun _ -> None
 
 #endif

@@ -252,7 +252,7 @@ let anchor_of_identifier id =
 
 (* Adds the global definitions, found in the [uid_to_loc], to the [loc_to_id]
    and [uid_to_id] tables. *)
-let populate_global_defs env source_id loc_to_id uid_to_loc uid_to_id =
+let populate_global_defs env source_id loc_to_id uid_to_item uid_to_id =
   let mk_src_id id =
     let name = Odoc_model.Names.DefName.make_std (anchor_of_identifier id) in
     (Odoc_model.Paths.Identifier.Mk.source_location (source_id, name)
@@ -270,7 +270,29 @@ let populate_global_defs env source_id loc_to_id uid_to_loc uid_to_id =
       :> Odoc_model.Paths.Identifier.SourceLocation.t)
   in
   Shape.Uid.Tbl.iter
-    (fun uid loc ->
+    (fun uid item ->
+      let loc =
+        let of_value_binding vb =
+          let bound_idents = Typedtree.let_bound_idents_full [vb] in
+          let (_, loc, _, _) =
+            List.find (fun (_, _, _, uid') -> uid = uid') bound_idents
+          in
+          loc.loc
+        in
+        match item with
+        | Typedtree.Value vd -> vd.val_name.loc
+        | Value_binding vb -> of_value_binding vb
+        | Type td -> td.typ_name.loc
+        | Constructor cd -> cd.cd_name.loc
+        | Label ld -> ld.ld_name.loc
+        | Module md -> md.md_name.loc
+        | Module_type mtd -> mtd.mtd_name.loc
+        | Module_substitution msd -> msd.ms_name.loc
+        | Module_binding mb -> mb.mb_name.loc
+        | Class cd -> cd.ci_id_name.loc
+        | Class_type ctd -> ctd.ci_id_name.loc
+        | Extension_constructor ec -> ec.ext_name.loc
+      in
       if loc.Location.loc_ghost then ()
       else
         match LocHashtbl.find_opt loc_to_id loc with
@@ -284,7 +306,7 @@ let populate_global_defs env source_id loc_to_id uid_to_loc uid_to_id =
                 UidHashtbl.add uid_to_id uid id
             | Compilation_unit _ -> ()
             | _ -> ()))
-    uid_to_loc
+    uid_to_item
 
 (* Extract [Typedtree_traverse] occurrence information and turn them into proper
    source infos *)
@@ -342,7 +364,7 @@ let add_definitions loc_to_id occurrences =
 
 let read_cmt_infos source_id shape_info impl digest root imports =
   match shape_info with
-  | Some (shape, uid_to_loc) ->
+  | Some (shape, uid_to_item) ->
       let fake_root_id =
         Odoc_model.Paths.Identifier.Mk.root
           (None, Odoc_model.Names.ModuleName.make_std "fake_root")
@@ -361,7 +383,7 @@ let read_cmt_infos source_id shape_info impl digest root imports =
       let () =
         populate_local_defs source_id traverse_infos loc_to_id
           local_ident_to_loc;
-        populate_global_defs env source_id loc_to_id uid_to_loc uid_to_id
+        populate_global_defs env source_id loc_to_id uid_to_item uid_to_id
       in
       let source_infos =
         process_occurrences env traverse_infos loc_to_id local_ident_to_loc
